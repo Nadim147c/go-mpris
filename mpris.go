@@ -3,6 +3,7 @@ package mpris
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/godbus/dbus/v5"
 )
@@ -32,14 +33,6 @@ func getProperty(obj *dbus.Object, iface string, prop string) (dbus.Variant, err
 func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) error {
 	call := obj.Call(setPropertyMethod, 0, iface, prop, dbus.MakeVariant(val))
 	return call.Err
-}
-
-func convertToMicroseconds(seconds float64) int64 {
-	return int64(seconds * 1000000)
-}
-
-func convertToSeconds(microseconds int64) float64 {
-	return float64(microseconds) / 1000000.0
 }
 
 // List lists the available players.
@@ -118,15 +111,17 @@ func (i *Player) Play() error {
 	return i.obj.Call(PlayerInterface+".Play", 0).Err
 }
 
-// Seek seeks the current track position by the offset. The offset should be in seconds.
+// Seek seeks the current track position by the offset.
 // If the offset is negative it's seeked back.
-func (i *Player) Seek(offset float64) error {
-	return i.obj.Call(PlayerInterface+".Seek", 0, convertToMicroseconds(offset)).Err
+func (i *Player) Seek(offset time.Duration) error {
+	oms := offset.Microseconds()
+	return i.obj.Call(PlayerInterface+".Seek", 0, oms).Err
 }
 
-// SetTrackPosition sets the position of a track. The position should be in seconds.
-func (i *Player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) error {
-	return i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertToMicroseconds(position)).Err
+// SetTrackPosition sets the position of a track.
+func (i *Player) SetTrackPosition(trackId *dbus.ObjectPath, position time.Duration) error {
+	oms := position.Microseconds()
+	return i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, oms).Err
 }
 
 // OpenUri opens and plays the uri if supported.
@@ -260,33 +255,35 @@ func (i *Player) SetVolume(volume float64) error {
 	return setProperty(i.obj, PlayerInterface, "Volume", volume)
 }
 
-// GetLength returns the current track length in seconds.
-func (i *Player) GetLength() (float64, error) {
+// GetLength returns the current track length.
+func (i *Player) GetLength() (time.Duration, error) {
 	metadata, err := i.GetMetadata()
 	if err != nil {
-		return 0.0, err
+		return 0, err
 	}
 	if metadata == nil || metadata["mpris:length"].Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0, fmt.Errorf("Variant value is nil")
 	}
 	val := metadata["mpris:length"].Value().(uint64)
-	return convertToSeconds(int64(val)), nil
+	duration := time.Duration(val) * time.Microsecond
+	return duration, nil
 }
 
-// GetPosition returns the position in seconds of the current track.
-func (i *Player) GetPosition() (float64, error) {
+// GetPosition returns the position of the current track.
+func (i *Player) GetPosition() (time.Duration, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Position")
 	if err != nil {
-		return 0.0, err
+		return 0, err
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0, fmt.Errorf("Variant value is nil")
 	}
-	return convertToSeconds(variant.Value().(int64)), nil
+	duration := time.Duration(variant.Value().(int64)) * time.Microsecond
+	return duration, nil
 }
 
-// SetPosition sets the position of the current track. The position should be in seconds.
-func (i *Player) SetPosition(position float64) error {
+// SetPosition sets the position of the current track.
+func (i *Player) SetPosition(position time.Duration) error {
 	metadata, err := i.GetMetadata()
 	if err != nil {
 		return err

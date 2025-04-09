@@ -173,10 +173,10 @@ func TestPlayerGetMethods(t *testing.T) {
 
 		// Length should be positive
 		if length < 0 {
-			t.Errorf("Expected positive length, got %f seconds", length)
+			t.Errorf("Expected positive length, got %s seconds", length.String())
 		}
 
-		t.Logf("Track length: %.2f seconds (%.2f minutes)", length, length/60)
+		t.Logf("Track length: %sf ", length.String())
 	})
 
 	// Test GetPosition
@@ -190,17 +190,17 @@ func TestPlayerGetMethods(t *testing.T) {
 
 		// Check that position is non-negative
 		if position < 0 {
-			t.Errorf("Expected non-negative position, got %f seconds", position)
+			t.Errorf("Expected non-negative position, got %s", position.String())
 		}
 
 		// Get the track length and check that position is not beyond it
 		length, lengthErr := player.GetLength()
 		if lengthErr == nil && length > 0 && position > length+5 {
 			// Adding some tolerance (5 seconds) for timing issues
-			t.Errorf("Position (%f) exceeds track length (%f)", position, length)
+			t.Errorf("Position (%s) exceeds track length (%s)", position.String(), length.String())
 		}
 
-		t.Logf("Track position: %.2f seconds (%.2f minutes)", position, position/60)
+		t.Logf("Track position: %s", position.String())
 	})
 
 	// Test GetProperty
