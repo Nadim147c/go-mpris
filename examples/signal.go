@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Nadim147c/go-mpris"
@@ -27,7 +28,7 @@ func main() {
 	player := mpris.New(conn, name)
 
 	ch := make(chan *dbus.Signal)
-	err := player.OnSignal(ch)
+	err = player.OnSignal(ch)
 	if err != nil {
 		panic(err)
 	}
