@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/Pauloo27/go-mpris"
+	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
 )
 
