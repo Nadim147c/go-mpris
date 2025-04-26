@@ -2,6 +2,7 @@ package mpris
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -264,9 +265,19 @@ func (i *Player) GetLength() (time.Duration, error) {
 	if metadata == nil || metadata["mpris:length"].Value() == nil {
 		return 0, fmt.Errorf("Variant value is nil")
 	}
-	val := metadata["mpris:length"].Value().(uint64)
-	duration := time.Duration(val) * time.Microsecond
-	return duration, nil
+
+	length := metadata["mpris:length"].Value()
+
+	v := reflect.ValueOf(length)
+
+	switch v.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return time.Duration(v.Int()) * time.Microsecond, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return time.Duration(int64(v.Uint())) * time.Microsecond, nil
+	default:
+		return 0, nil
+	}
 }
 
 // GetPosition returns the position of the current track.
