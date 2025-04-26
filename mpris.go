@@ -264,7 +264,7 @@ func (i *Player) GetLength() (time.Duration, error) {
 	if metadata == nil || metadata["mpris:length"].Value() == nil {
 		return 0, fmt.Errorf("Variant value is nil")
 	}
-	val := metadata["mpris:length"].Value().(uint64)
+	val := metadata["mpris:length"].Value().(int64)
 	duration := time.Duration(val) * time.Microsecond
 	return duration, nil
 }
