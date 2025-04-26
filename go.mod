@@ -1,4 +1,4 @@
-module github.com/Nadim147c/go-mpris
+module github.com/Kolyakot33/go-mpris
 
 go 1.20
 
