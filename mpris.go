@@ -415,7 +415,7 @@ func (i *Player) GetURL() (string, error) {
 	if metadata == nil {
 		return "", fmt.Errorf("metadata is nil")
 	}
-	v, ok := metadata["mpris:url"]
+	v, ok := metadata["xesam:url"]
 	if !ok || v.Value() == nil {
 		return "", fmt.Errorf("metadata missing or nil for key 'mpris:artUrl'")
 	}
