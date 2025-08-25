@@ -340,6 +340,86 @@ func (i *Player) SetPosition(position time.Duration) error {
 	return nil
 }
 
+// GetTitle returns the current track title.
+func (i *Player) GetTitle() (string, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return "", fmt.Errorf("failed to get metadata for title: %w", err)
+	}
+	if metadata == nil {
+		return "", fmt.Errorf("metadata is nil")
+	}
+	v, ok := metadata["xesam:title"]
+	if !ok || v.Value() == nil {
+		return "", fmt.Errorf("metadata missing or nil for key 'xesam:title'")
+	}
+	title, err := cast.ToStringE(v.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast 'xesam:title' value (%v) to string: %w", v.Value(), err)
+	}
+	return title, nil
+}
+
+// GetArtist returns the current track artist(s).
+func (i *Player) GetArtist() ([]string, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get metadata for artist: %w", err)
+	}
+	if metadata == nil {
+		return nil, fmt.Errorf("metadata is nil")
+	}
+	v, ok := metadata["xesam:artist"]
+	if !ok || v.Value() == nil {
+		return nil, fmt.Errorf("metadata missing or nil for key 'xesam:artist'")
+	}
+	artists, err := cast.ToStringSliceE(v.Value())
+	if err != nil {
+		return nil, fmt.Errorf("failed to cast 'xesam:artist' value (%v) to []string: %w", v.Value(), err)
+	}
+	return artists, nil
+}
+
+// GetAlbum returns the current track album.
+func (i *Player) GetAlbum() (string, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return "", fmt.Errorf("failed to get metadata for album: %w", err)
+	}
+	if metadata == nil {
+		return "", fmt.Errorf("metadata is nil")
+	}
+	v, ok := metadata["xesam:album"]
+	if !ok || v.Value() == nil {
+		return "", fmt.Errorf("metadata missing or nil for key 'xesam:album'")
+	}
+	album, err := cast.ToStringE(v.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast 'xesam:album' value (%v) to string: %w", v.Value(), err)
+	}
+	return album, nil
+}
+
+// GetCoverURL returns the cover art URL of the current track.
+func (i *Player) GetCoverURL() (string, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return "", fmt.Errorf("failed to get metadata for cover URL: %w", err)
+	}
+	if metadata == nil {
+		return "", fmt.Errorf("metadata is nil")
+	}
+	v, ok := metadata["mpris:artUrl"]
+	if !ok || v.Value() == nil {
+		return "", fmt.Errorf("metadata missing or nil for key 'mpris:artUrl'")
+	}
+	url, err := cast.ToStringE(v.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast 'mpris:artUrl' value (%v) to string: %w", v.Value(), err)
+	}
+	return url, nil
+}
+
 // SetVolume sets the volume.
 func (i *Player) SetVolume(volume float64) error {
 	return setProperty(i.obj, PlayerInterface, "Volume", volume)
