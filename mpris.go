@@ -406,6 +406,26 @@ func (i *Player) GetAlbum() (string, error) {
 	return album, nil
 }
 
+// GetURL returns the URL of the current track.
+func (i *Player) GetURL() (string, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return "", fmt.Errorf("failed to get metadata for cover URL: %w", err)
+	}
+	if metadata == nil {
+		return "", fmt.Errorf("metadata is nil")
+	}
+	v, ok := metadata["mpris:url"]
+	if !ok || v.Value() == nil {
+		return "", fmt.Errorf("metadata missing or nil for key 'mpris:artUrl'")
+	}
+	url, err := cast.ToStringE(v.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast 'mpris:url' value (%v) to string: %w", v.Value(), err)
+	}
+	return url, nil
+}
+
 // GetCoverURL returns the cover art URL of the current track.
 func (i *Player) GetCoverURL() (string, error) {
 	metadata, err := i.GetMetadata()
