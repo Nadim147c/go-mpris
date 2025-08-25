@@ -2,11 +2,11 @@ package mpris
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -78,8 +78,11 @@ func (i *Player) Quit() error {
 // GetIdentity returns the player identity.
 func (i *Player) GetIdentity() (string, error) {
 	value, err := getProperty(i.obj, BaseInterface, "Identity")
+	if err != nil {
+		return "", err
+	}
 
-	return value.Value().(string), err
+	return cast.ToStringE(value.Value())
 }
 
 // Next skips to the next track in the tracklist.
@@ -143,12 +146,16 @@ const (
 func (i *Player) GetPlaybackStatus() (PlaybackStatus, error) {
 	variant, err := i.obj.GetProperty(PlayerInterface + ".PlaybackStatus")
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get property %s.PlaybackStatus: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return "", fmt.Errorf("Variant value is nil")
+		return "", fmt.Errorf("property %s.PlaybackStatus returned nil value", PlayerInterface)
 	}
-	return PlaybackStatus(variant.Value().(string)), nil
+	str, err := cast.ToStringE(variant.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast PlaybackStatus value (%v) to string: %w", variant.Value(), err)
+	}
+	return PlaybackStatus(str), nil
 }
 
 // LoopStatus the status of the player loop. It can be "None", "Track" or "Playlist".
@@ -164,12 +171,16 @@ const (
 func (i *Player) GetLoopStatus() (LoopStatus, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
 	if err != nil {
-		return LoopStatus(""), err
+		return "", fmt.Errorf("failed to get property %s.LoopStatus: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return "", fmt.Errorf("Variant value is nil")
+		return "", fmt.Errorf("property %s.LoopStatus returned nil value", PlayerInterface)
 	}
-	return LoopStatus(variant.Value().(string)), nil
+	str, err := cast.ToStringE(variant.Value())
+	if err != nil {
+		return "", fmt.Errorf("failed to cast LoopStatus value (%v) to string: %w", variant.Value(), err)
+	}
+	return LoopStatus(str), nil
 }
 
 // SetLoopStatus sets the loop status to loopStatus.
@@ -178,12 +189,12 @@ func (i *Player) SetLoopStatus(loopStatus LoopStatus) error {
 }
 
 // SetProperty sets the value of a propertyName in the targetInterface.
-func (i *Player) SetProperty(targetInterface, propertyName string, value interface{}) error {
+func (i *Player) SetProperty(targetInterface, propertyName string, value any) error {
 	return setProperty(i.obj, targetInterface, propertyName, value)
 }
 
 // SetPlayerProperty sets the propertyName from the player interface.
-func (i *Player) SetPlayerProperty(propertyName string, value interface{}) error {
+func (i *Player) SetPlayerProperty(propertyName string, value any) error {
 	return setProperty(i.obj, PlayerInterface, propertyName, value)
 }
 
@@ -201,110 +212,137 @@ func (i *Player) GetPlayerProperty(properityName string) (dbus.Variant, error) {
 func (i *Player) GetRate() (float64, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Rate")
 	if err != nil {
-		return 0.0, err
+		return 0.0, fmt.Errorf("failed to get property %s.Rate: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("property %s.Rate returned nil value", PlayerInterface)
 	}
-	return variant.Value().(float64), nil
+	val, err := cast.ToFloat64E(variant.Value())
+	if err != nil {
+		return 0.0, fmt.Errorf("failed to cast Rate value (%v) to float64: %w", variant.Value(), err)
+	}
+	return val, nil
 }
 
-// GetShuffle returns false if the player is going linearly through a playlist and false if it's
+// GetShuffle returns false if the player is going linearly through a playlist and true if it's
 // in some other order.
 func (i *Player) GetShuffle() (bool, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Shuffle")
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to get property %s.Shuffle: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return false, fmt.Errorf("Variant value is nil")
+		return false, fmt.Errorf("property %s.Shuffle returned nil value", PlayerInterface)
 	}
-	return variant.Value().(bool), nil
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast Shuffle value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
 }
 
 // SetShuffle sets the shuffle playlist mode.
 func (i *Player) SetShuffle(value bool) error {
-	return setProperty(i.obj, PlayerInterface, "Shuffle", value)
+	if err := setProperty(i.obj, PlayerInterface, "Shuffle", value); err != nil {
+		return fmt.Errorf("failed to set property %s.Shuffle to %v: %w", PlayerInterface, value, err)
+	}
+	return nil
 }
 
 // GetMetadata returns the metadata.
 func (i *Player) GetMetadata() (map[string]dbus.Variant, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Metadata")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get property %s.Metadata: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return nil, fmt.Errorf("Variant value is nil")
+		return nil, fmt.Errorf("property %s.Metadata returned nil value", PlayerInterface)
 	}
-	return variant.Value().(map[string]dbus.Variant), nil
+	v, ok := variant.Value().(map[string]dbus.Variant)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast Metadata value (%v) to map[string]dbus.Variant", variant.Value())
+	}
+	return v, nil
 }
 
 // GetVolume returns the volume.
 func (i *Player) GetVolume() (float64, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Volume")
 	if err != nil {
-		return 0.0, err
+		return 0.0, fmt.Errorf("failed to get property %s.Volume: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("property %s.Volume returned nil value", PlayerInterface)
 	}
-	return variant.Value().(float64), nil
-}
-
-// SetVolume sets the volume.
-func (i *Player) SetVolume(volume float64) error {
-	return setProperty(i.obj, PlayerInterface, "Volume", volume)
+	val, err := cast.ToFloat64E(variant.Value())
+	if err != nil {
+		return 0.0, fmt.Errorf("failed to cast Volume value (%v) to float64: %w", variant.Value(), err)
+	}
+	return val, nil
 }
 
 // GetLength returns the current track length.
 func (i *Player) GetLength() (time.Duration, error) {
 	metadata, err := i.GetMetadata()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to get metadata for length: %w", err)
 	}
-	if metadata == nil || metadata["mpris:length"].Value() == nil {
-		return 0, fmt.Errorf("Variant value is nil")
+	if metadata == nil {
+		return 0, fmt.Errorf("metadata is nil")
 	}
-
-	length := metadata["mpris:length"].Value()
-
-	v := reflect.ValueOf(length)
-
-	switch v.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return time.Duration(v.Int()) * time.Microsecond, nil
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return time.Duration(int64(v.Uint())) * time.Microsecond, nil
-	default:
-		return 0, nil
+	v, ok := metadata["mpris:length"]
+	if !ok || v.Value() == nil {
+		return 0, fmt.Errorf("metadata missing or nil for key 'mpris:length'")
 	}
+	micro, err := cast.ToInt64E(v.Value())
+	if err != nil {
+		return 0, fmt.Errorf("failed to cast 'mpris:length' value (%v) to int64: %w", v.Value(), err)
+	}
+	return time.Duration(micro) * time.Microsecond, nil
 }
 
 // GetPosition returns the position of the current track.
 func (i *Player) GetPosition() (time.Duration, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Position")
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to get property %s.Position: %w", PlayerInterface, err)
 	}
 	if variant.Value() == nil {
-		return 0, fmt.Errorf("Variant value is nil")
+		return 0, fmt.Errorf("property %s.Position returned nil value", PlayerInterface)
 	}
-	duration := time.Duration(variant.Value().(int64)) * time.Microsecond
-	return duration, nil
+	micro, err := cast.ToInt64E(variant.Value())
+	if err != nil {
+		return 0, fmt.Errorf("failed to cast Position value (%v) to int64: %w", variant.Value(), err)
+	}
+	return time.Duration(micro) * time.Microsecond, nil
 }
 
 // SetPosition sets the position of the current track.
 func (i *Player) SetPosition(position time.Duration) error {
 	metadata, err := i.GetMetadata()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get metadata for SetPosition: %w", err)
 	}
-	if metadata == nil || metadata["mpris:trackid"].Value() == nil {
-		return fmt.Errorf("Variant value is nil")
+	if metadata == nil {
+		return fmt.Errorf("metadata is nil")
 	}
-	trackId := metadata["mpris:trackid"].Value().(dbus.ObjectPath)
-	i.SetTrackPosition(&trackId, position)
+	v, ok := metadata["mpris:trackid"]
+	if !ok || v.Value() == nil {
+		return fmt.Errorf("metadata missing or nil for key 'mpris:trackid'")
+	}
+	trackId, ok := v.Value().(dbus.ObjectPath)
+	if !ok {
+		return fmt.Errorf("failed to cast 'mpris:trackid' value (%v) to dbus.ObjectPath", v.Value())
+	}
+	if err := i.SetTrackPosition(&trackId, position); err != nil {
+		return fmt.Errorf("failed to set track position for trackId %s at %v: %w", trackId, position, err)
+	}
 	return nil
+}
+
+// SetVolume sets the volume.
+func (i *Player) SetVolume(volume float64) error {
+	return setProperty(i.obj, PlayerInterface, "Volume", volume)
 }
 
 // New connects the the player with the name in the connection conn.
