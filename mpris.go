@@ -24,16 +24,22 @@ const (
 
 func getProperty(obj *dbus.Object, iface string, prop string) (dbus.Variant, error) {
 	result := dbus.Variant{}
-	err := obj.Call(getPropertyMethod, 0, iface, prop).Store(&result)
-	if err != nil {
-		return dbus.Variant{}, err
+	call := obj.Call(getPropertyMethod, 0, iface, prop)
+	if call.Err != nil {
+		return dbus.Variant{}, fmt.Errorf("failed to get property %s.%s: %w", iface, prop, call.Err)
+	}
+	if err := call.Store(&result); err != nil {
+		return dbus.Variant{}, fmt.Errorf("failed to store property %s.%s result into variant: %w", iface, prop, err)
 	}
 	return result, nil
 }
 
-func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) error {
+func setProperty(obj *dbus.Object, iface string, prop string, val any) error {
 	call := obj.Call(setPropertyMethod, 0, iface, prop, dbus.MakeVariant(val))
-	return call.Err
+	if call.Err != nil {
+		return fmt.Errorf("failed to set property %s.%s to value (%v): %w", iface, prop, val, call.Err)
+	}
+	return nil
 }
 
 // List lists the available players.
