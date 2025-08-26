@@ -336,10 +336,18 @@ func (i *Player) SetPosition(position time.Duration) error {
 	if !ok || v.Value() == nil {
 		return fmt.Errorf("metadata missing or nil for key 'mpris:trackid'")
 	}
-	trackId, ok := v.Value().(dbus.ObjectPath)
-	if !ok {
-		return fmt.Errorf("failed to cast 'mpris:trackid' value (%v) to dbus.ObjectPath", v.Value())
+
+	var trackId dbus.ObjectPath
+
+	switch val := v.Value().(type) {
+	case dbus.ObjectPath:
+		trackId = val
+	case string:
+		trackId = dbus.ObjectPath(val)
+	default:
+		return fmt.Errorf("unexpected type for 'mpris:trackid': %T (%v)", val, val)
 	}
+
 	if err := i.SetTrackPosition(&trackId, position); err != nil {
 		return fmt.Errorf("failed to set track position for trackId %s at %v: %w", trackId, position, err)
 	}
