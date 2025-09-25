@@ -91,6 +91,118 @@ func (i *Player) GetIdentity() (string, error) {
 	return cast.ToStringE(value.Value())
 }
 
+// CanPlay returns if player can play
+func (i *Player) CanPlay() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanPlay")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanPlay: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanPlay returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanPlay value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanPause returns if player can pause
+func (i *Player) CanPause() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanPause")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanPause: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanPause returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanPause value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanSeek returns if player can seek
+func (i *Player) CanSeek() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanSeek")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanSeek: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanSeek returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanSeek value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanControl returns if player can control
+func (i *Player) CanControl() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanControl")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanControl: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanControl returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanControl value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanGoNext returns if player can go next
+func (i *Player) CanGoNext() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanGoNext")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanGoNext: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanGoNext returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanGoNext value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanGoPrevious returns if player can go previous
+func (i *Player) CanGoPrevious() (bool, error) {
+	variant, err := getProperty(i.obj, PlayerInterface, "CanGoPrevious")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanGoPrevious: %w", PlayerInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanGoPrevious returned nil value", PlayerInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanGoPrevious value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
+// CanEditTracks returns if player can edit track list
+func (i *Player) CanEditTracks() (bool, error) {
+	variant, err := getProperty(i.obj, TrackListInterface, "CanEditTracks")
+	if err != nil {
+		return false, fmt.Errorf("failed to get property %s.CanEditTracks: %w", TrackListInterface, err)
+	}
+	if variant.Value() == nil {
+		return false, fmt.Errorf("property %s.CanEditTracks returned nil value", TrackListInterface)
+	}
+	val, err := cast.ToBoolE(variant.Value())
+	if err != nil {
+		return false, fmt.Errorf("failed to cast CanEditTracks value (%v) to bool: %w", variant.Value(), err)
+	}
+	return val, nil
+}
+
 // Next skips to the next track in the tracklist.
 func (i *Player) Next() error {
 	return i.obj.Call(PlayerInterface+".Next", 0).Err

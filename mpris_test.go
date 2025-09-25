@@ -35,6 +35,42 @@ func TestPlayerGetMethods(t *testing.T) {
 		t.Logf("Player name: %s", name)
 	})
 
+	t.Run("CanPlay", func(t *testing.T) {
+		b, err := player.CanPlay()
+		if err != nil {
+			t.Errorf("CanPlay returned error: %v", err)
+		}
+
+		t.Logf("Can play: %v", b)
+	})
+
+	t.Run("CanControl", func(t *testing.T) {
+		b, err := player.CanPlay()
+		if err != nil {
+			t.Errorf("CanControl returned error: %v", err)
+		}
+
+		t.Logf("Can control: %v", b)
+	})
+
+	t.Run("CanGoPrevious", func(t *testing.T) {
+		b, err := player.CanPlay()
+		if err != nil {
+			t.Errorf("CanGoPrevious returned error: %v", err)
+		}
+
+		t.Logf("Can previous: %v", b)
+	})
+
+	t.Run("CanEditTraks", func(t *testing.T) {
+		b, err := player.CanEditTracks()
+		if err != nil {
+			t.Errorf("CanPlay returned error: %v", err)
+		}
+
+		t.Logf("Can play: %v", b)
+	})
+
 	// Test GetIdentity
 	t.Run("GetIdentity", func(t *testing.T) {
 		identity, err := player.GetIdentity()
