@@ -1,6 +1,7 @@
 package mpris
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/godbus/dbus/v5"
@@ -56,13 +57,7 @@ func TestPlayerGetMethods(t *testing.T) {
 		}
 
 		validStatuses := []PlaybackStatus{PlaybackPlaying, PlaybackPaused, PlaybackStopped}
-		valid := false
-		for _, validStatus := range validStatuses {
-			if status == validStatus {
-				valid = true
-				break
-			}
-		}
+		valid := slices.Contains(validStatuses, status)
 
 		if !valid {
 			t.Errorf("Expected valid PlaybackStatus, got %s", status)
@@ -81,13 +76,7 @@ func TestPlayerGetMethods(t *testing.T) {
 		}
 
 		validStatuses := []LoopStatus{LoopNone, LoopTrack, LoopPlaylist}
-		valid := false
-		for _, validStatus := range validStatuses {
-			if loopStatus == validStatus {
-				valid = true
-				break
-			}
-		}
+		valid := slices.Contains(validStatuses, loopStatus)
 
 		if !valid {
 			t.Errorf("Expected valid LoopStatus, got %s", loopStatus)

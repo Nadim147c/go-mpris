@@ -330,33 +330,39 @@ func (i *Player) GetPosition() (time.Duration, error) {
 	return time.Duration(micro) * time.Microsecond, nil
 }
 
-// SetPosition sets the position of the current track.
-func (i *Player) SetPosition(position time.Duration) error {
+// GetTrackID returns track id for player as dbus.ObjectPath
+func (i *Player) GetTrackID() (dbus.ObjectPath, error) {
 	metadata, err := i.GetMetadata()
 	if err != nil {
-		return fmt.Errorf("failed to get metadata for SetPosition: %w", err)
+		return "", fmt.Errorf("failed to get metadata for GetTrackID: %w", err)
 	}
 	if metadata == nil {
-		return fmt.Errorf("metadata is nil")
+		return "", fmt.Errorf("metadata is nil")
 	}
 	v, ok := metadata["mpris:trackid"]
 	if !ok || v.Value() == nil {
-		return fmt.Errorf("metadata missing or nil for key 'mpris:trackid'")
+		return "", fmt.Errorf("metadata missing or nil for key 'mpris:trackid'")
 	}
-
-	var trackId dbus.ObjectPath
 
 	switch val := v.Value().(type) {
 	case dbus.ObjectPath:
-		trackId = val
+		return val, nil
 	case string:
-		trackId = dbus.ObjectPath(val)
+		return dbus.ObjectPath(val), nil
 	default:
-		return fmt.Errorf("unexpected type for 'mpris:trackid': %T (%v)", val, val)
+		v, err := cast.ToStringE(val)
+		return dbus.ObjectPath(v), err
 	}
+}
 
-	if err := i.SetTrackPosition(&trackId, position); err != nil {
-		return fmt.Errorf("failed to set track position for trackId %s at %v: %w", trackId, position, err)
+// SetPosition sets the position of the current track.
+func (i *Player) SetPosition(position time.Duration) error {
+	trackID, err := i.GetTrackID()
+	if err != nil {
+		return err
+	}
+	if err := i.SetTrackPosition(&trackID, position); err != nil {
+		return fmt.Errorf("failed to set track position for trackId %s at %v: %w", trackID, position, err)
 	}
 	return nil
 }
