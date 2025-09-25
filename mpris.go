@@ -135,7 +135,14 @@ func (i *Player) SetTrackPosition(trackId *dbus.ObjectPath, position time.Durati
 }
 
 // OpenUri opens and plays the uri if supported.
+//
+// Deprecated: Use OpenURI instead of OpenUri
 func (i *Player) OpenUri(uri string) error {
+	return i.OpenURI(uri)
+}
+
+// OpenURI opens and plays the uri if supported.
+func (i *Player) OpenURI(uri string) error {
 	return i.obj.Call(PlayerInterface+".OpenUri", 0, uri).Err
 }
 
