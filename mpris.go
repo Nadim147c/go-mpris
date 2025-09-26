@@ -51,25 +51,6 @@ func (i *Player) GetName() string {
 	return i.name
 }
 
-// Raise raises player priority.
-func (i *Player) Raise() error {
-	return i.obj.Call(BaseInterface+".Raise", 0).Err
-}
-
-// Quit closes the player.
-func (i *Player) Quit() error {
-	return i.obj.Call(BaseInterface+".Quit", 0).Err
-}
-
-// GetIdentity returns the player identity.
-func (i *Player) GetIdentity() (string, error) {
-	value, err := i.GetBaseProperty("Identity")
-	if err != nil {
-		return "", err
-	}
-	return cast.ToStringE(value.Value())
-}
-
 // CanPlay returns if player can play
 func (i *Player) CanPlay() (bool, error) {
 	return getPlayerPropertyCast(i, "CanPlay", cast.ToBoolE)

@@ -34,6 +34,23 @@ func TestPlayerGetMethods(t *testing.T) {
 
 		t.Logf("Player name: %s", name)
 	})
+	t.Run("GetSupportedUriSchemes", func(t *testing.T) {
+		b, err := player.GetSupportedUriSchemes()
+		if err != nil {
+			t.Errorf("GetSupportedUriSchemes returned error: %v", err)
+		}
+
+		t.Logf("SupportedUriSchemes: %v", b)
+	})
+
+	t.Run("HasTrackList", func(t *testing.T) {
+		b, err := player.HasTrackList()
+		if err != nil {
+			t.Errorf("HasTrackList returned error: %v", err)
+		}
+
+		t.Logf("HasTrackList: %v", b)
+	})
 
 	t.Run("CanPlay", func(t *testing.T) {
 		b, err := player.CanPlay()
