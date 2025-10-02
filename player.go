@@ -1,6 +1,7 @@
 package mpris
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -72,6 +73,43 @@ func (i *Player) OpenUri(uri string) error {
 // OpenURI opens and plays the given URI if supported.
 func (i *Player) OpenURI(uri string) error {
 	return i.obj.Call(PlayerInterface+".OpenUri", 0, uri).Err
+}
+
+// Signals
+
+// OnSeeked listens for  "Seeked" signal and sends the new position as time.Duration to position
+// until ctx is canceled.
+func (i *Player) OnSeeked(ctx context.Context, position chan<- time.Duration) error {
+	sigChan := make(chan *dbus.Signal, 10) // buffered to avoid blocking
+	defer close(sigChan)
+
+	err := i.conn.AddMatchSignal(
+		dbus.WithMatchInterface(PlayerInterface),
+		dbus.WithMatchMember("Seeked"),
+	)
+	if err != nil {
+		return err
+	}
+
+	i.conn.Signal(sigChan)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case signal, ok := <-sigChan:
+			if !ok {
+				return nil
+			}
+			if len(signal.Body) != 1 {
+				continue
+			}
+
+			if val, err := cast.ToInt64E(signal.Body[0]); err == nil {
+				position <- time.Duration(val) * time.Microsecond
+			}
+		}
+	}
 }
 
 // Properties

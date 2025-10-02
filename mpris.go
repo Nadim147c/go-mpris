@@ -99,6 +99,8 @@ func New(conn *dbus.Conn, name string) *Player {
 }
 
 // OnSignal adds a handler to the player's properties change signal.
+//
+// Deprecated: Use OnSeeked
 func (i *Player) OnSignal(ch chan<- *dbus.Signal) (err error) {
 	err = i.conn.AddMatchSignal()
 	if err == nil {
