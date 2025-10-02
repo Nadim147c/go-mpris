@@ -1,12 +1,20 @@
 # GO-MPRIS
 
-A Go library for MPRIS.
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/go-mpris?style=for-the-badge&logo=go)](https://pkg.go.dev/github.com/Nadim147c/go-mpris)
+[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github)](https://github.com/Nadim147c/go-mpris)
+[![GitHub License](https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge)](./LICENSE)
+[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/go-mpris?include_prereleases&sort=semver&style=for-the-badge&logo=github)](https://github.com/Nadim147c/go-mpris/tags)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Nadim147c/go-mpris?style=for-the-badge&logo=git)](https://github.com/Nadim147c/go-mpris/commits/master)
+
+A Go library for DBus-MPRIS.
 
 ## Install
 
-> $ go get github.com/Nadim147c/go-mpris
+```bash
+go get github.com/Nadim147c/go-mpris
+```
 
-_the dependency github.com/godbus/dbus/v5 is going to be installed as well._
+> The dependency github.com/godbus/dbus/v5 is going to be installed as well.
 
 ## Example
 
