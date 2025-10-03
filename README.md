@@ -1,10 +1,12 @@
 # GO-MPRIS
 
-[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/go-mpris?style=for-the-badge&logo=go)](https://pkg.go.dev/github.com/Nadim147c/go-mpris)
-[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github)](https://github.com/Nadim147c/go-mpris)
-[![GitHub License](https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge)](./LICENSE)
-[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/go-mpris?include_prereleases&sort=semver&style=for-the-badge&logo=github)](https://github.com/Nadim147c/go-mpris/tags)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Nadim147c/go-mpris?style=for-the-badge&logo=git)](https://github.com/Nadim147c/go-mpris/commits/master)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/go-mpris?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA)](https://pkg.go.dev/github.com/Nadim147c/go-mpris)
+[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris)
+[![GitHub License](https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge&labelColor=11140F&color=BBE9AA)](./LICENSE)
+[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/go-mpris?include_prereleases&sort=semver&style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris/tags)
+
+> [!IMPORTANT]
+> 🔥 Found this useful? A quick star goes a long way.
 
 A Go library for DBus-MPRIS.
 
