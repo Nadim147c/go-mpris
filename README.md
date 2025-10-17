@@ -4,11 +4,20 @@
 [![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris)
 [![GitHub License](https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge&labelColor=11140F&color=BBE9AA)](./LICENSE)
 [![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/go-mpris?include_prereleases&sort=semver&style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris/tags)
+[![Git Commit](https://img.shields.io/github/last-commit/Nadim147c/go-mpris?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris/tags)
 
 > [!IMPORTANT]
 > 🔥 Found this useful? A quick star goes a long way.
 
 A Go library for DBus-MPRIS.
+
+## Features
+
+1. Full MPRIS 2.2 support for `Base` and `Player` interfaces (`TrackList`
+   and `Playlists` are incomplete).
+1. Type-safe D-Bus access ensuring reliable data handling across all players.
+1. Native `time.Duration` usage for playback times instead of raw microseconds.
+1. Simple, high-level API for playback control, metadata, and property management.
 
 ## Install
 
