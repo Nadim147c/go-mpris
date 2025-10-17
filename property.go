@@ -8,9 +8,21 @@ import (
 
 // SetProperty sets the value of a property in the interface.
 func (i *Player) SetProperty(iface, property string, value any) error {
-	call := i.obj.Call(setPropertyMethod, 0, iface, property, dbus.MakeVariant(value))
+	call := i.obj.Call(
+		SetPropertyMethod,
+		0,
+		iface,
+		property,
+		dbus.MakeVariant(value),
+	)
 	if call.Err != nil {
-		return fmt.Errorf("failed to set property %s.%s to value (%v): %w", iface, property, value, call.Err)
+		return fmt.Errorf(
+			"failed to set property %s.%s to value (%v): %w",
+			iface,
+			property,
+			value,
+			call.Err,
+		)
 	}
 	return nil
 }
@@ -38,12 +50,22 @@ func (i *Player) SetPlaylistsProperty(property string, value any) error {
 // GetProperty returns the prop in the iface.
 func (i *Player) GetProperty(iface, property string) (dbus.Variant, error) {
 	result := dbus.Variant{}
-	call := i.obj.Call(getPropertyMethod, 0, iface, property)
+	call := i.obj.Call(GetPropertyMethod, 0, iface, property)
 	if call.Err != nil {
-		return dbus.Variant{}, fmt.Errorf("failed to get property %s.%s: %w", iface, property, call.Err)
+		return dbus.Variant{}, fmt.Errorf(
+			"failed to get property %s.%s: %w",
+			iface,
+			property,
+			call.Err,
+		)
 	}
 	if err := call.Store(&result); err != nil {
-		return dbus.Variant{}, fmt.Errorf("failed to store property %s.%s result into variant: %w", iface, property, err)
+		return dbus.Variant{}, fmt.Errorf(
+			"failed to store property %s.%s result into variant: %w",
+			iface,
+			property,
+			err,
+		)
 	}
 	return result, nil
 }
@@ -68,45 +90,85 @@ func (i *Player) GetPlaylistsProperty(property string) (dbus.Variant, error) {
 	return i.GetProperty(PlaylistsInterface, property)
 }
 
-// getPropertyCast returns property and casts value using the provided caster function.
-func getPropertyCast[T any](i *Player, iface, property string, caster func(any) (T, error)) (T, error) {
+// getPropertyCast returns property and casts value using the provided caster
+// function.
+func getPropertyCast[T any](
+	i *Player,
+	iface, property string,
+	caster func(any) (T, error),
+) (T, error) {
 	var v T
 	variant, err := i.GetProperty(iface, property)
 	if err != nil {
 		return v, err
 	}
 	if variant.Value() == nil {
-		return v, fmt.Errorf("property %s.%s returned nil value", iface, property)
+		return v, fmt.Errorf(
+			"property %s.%s returned nil value",
+			iface,
+			property,
+		)
 	}
 	result, err := caster(variant.Value())
 	if err != nil {
-		return v, fmt.Errorf("failed to cast %s.%s value (%v): %w", iface, property, variant.Value(), err)
+		return v, fmt.Errorf(
+			"failed to cast %s.%s value (%v): %w",
+			iface,
+			property,
+			variant.Value(),
+			err,
+		)
 	}
 	return result, nil
 }
 
-// getBasePropertyCast returns base interface property and casts value using the provided caster function.
-func getBasePropertyCast[T any](i *Player, property string, caster func(any) (T, error)) (T, error) {
+// getBasePropertyCast returns base interface property and casts value using the
+// provided caster function.
+func getBasePropertyCast[T any](
+	i *Player,
+	property string,
+	caster func(any) (T, error),
+) (T, error) {
 	return getPropertyCast(i, BaseInterface, property, caster)
 }
 
-// getPlayerPropertyCast returns player interface property and casts value using the provided caster function.
-func getPlayerPropertyCast[T any](i *Player, property string, caster func(any) (T, error)) (T, error) {
+// getPlayerPropertyCast returns player interface property and casts value using
+// the provided caster function.
+func getPlayerPropertyCast[T any](
+	i *Player,
+	property string,
+	caster func(any) (T, error),
+) (T, error) {
 	return getPropertyCast(i, PlayerInterface, property, caster)
 }
 
-// getTrackListPropertyCast returns tracklist interface property and casts value using the provided caster function.
-func getTrackListPropertyCast[T any](i *Player, property string, caster func(any) (T, error)) (T, error) {
+// getTrackListPropertyCast returns tracklist interface property and casts value
+// using the provided caster function.
+func getTrackListPropertyCast[T any](
+	i *Player,
+	property string,
+	caster func(any) (T, error),
+) (T, error) {
 	return getPropertyCast(i, TrackListInterface, property, caster)
 }
 
-// getPlaylistPropertyCast returns playlists interface property and casts value using the provided caster function.
-func getPlaylistPropertyCast[T any](i *Player, property string, caster func(any) (T, error)) (T, error) {
+// getPlaylistPropertyCast returns playlists interface property and casts value
+// using the provided caster function.
+func getPlaylistPropertyCast[T any](
+	i *Player,
+	property string,
+	caster func(any) (T, error),
+) (T, error) {
 	return getPropertyCast(i, PlaylistsInterface, property, caster)
 }
 
-// getMetadataCast returns metadata value for the given key and casts it using the provided caster function.
-func getMetadataCast[T any](i *Player, key string, caster func(any) (T, error)) (T, error) {
+// getMetadataCast returns metadata value for the given key and casts it using
+// the provided caster function.
+func getMetadataCast[T any](
+	i *Player,
+	key string,
+	caster func(any) (T, error),
+) (T, error) {
 	var v T
 	m, err := i.GetMetadata()
 	if err != nil {
@@ -118,7 +180,13 @@ func getMetadataCast[T any](i *Player, key string, caster func(any) (T, error)) 
 	}
 	v, err = caster(val)
 	if err != nil {
-		return v, fmt.Errorf("%s.Metadata: failed to cast value (%v) of %q: %w", PlayerInterface, val, key, err)
+		return v, fmt.Errorf(
+			"%s.Metadata: failed to cast value (%v) of %q: %w",
+			PlayerInterface,
+			val,
+			key,
+			err,
+		)
 	}
 	return v, nil
 }

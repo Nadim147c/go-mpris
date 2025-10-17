@@ -26,7 +26,8 @@ func (i *Player) Pause() error {
 	return i.obj.Call(PlayerInterface+".Pause", 0).Err
 }
 
-// PlayPause resumes the current track if it's paused and pauses it if it's playing.
+// PlayPause resumes the current track if it's paused and pauses it if it's
+// playing.
 func (i *Player) PlayPause() error {
 	return i.obj.Call(PlayerInterface+".PlayPause", 0).Err
 }
@@ -49,9 +50,12 @@ func (i *Player) Seek(offset time.Duration) error {
 }
 
 // SetTrackPosition sets the playback position of a specific track.
-func (i *Player) SetTrackPosition(trackId *dbus.ObjectPath, position time.Duration) error {
+func (i *Player) SetTrackPosition(
+	trackID *dbus.ObjectPath,
+	position time.Duration,
+) error {
 	oms := position.Microseconds()
-	return i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, oms).Err
+	return i.obj.Call(PlayerInterface+".SetPosition", 0, trackID, oms).Err
 }
 
 // SetPosition sets the playback position of the current track.
@@ -63,12 +67,16 @@ func (i *Player) SetPosition(position time.Duration) error {
 	return i.SetTrackPosition(&trackID, position)
 }
 
+//revive:disable:var-naming
+
 // OpenUri opens and plays the given URI if supported.
 //
 // Deprecated: Use OpenURI instead.
 func (i *Player) OpenUri(uri string) error {
 	return i.OpenURI(uri)
 }
+
+//revive:enable:var-naming
 
 // OpenURI opens and plays the given URI if supported.
 func (i *Player) OpenURI(uri string) error {
@@ -77,9 +85,12 @@ func (i *Player) OpenURI(uri string) error {
 
 // Signals
 
-// OnSeeked listens for  "Seeked" signal and sends the new position as time.Duration to position
-// until ctx is canceled.
-func (i *Player) OnSeeked(ctx context.Context, position chan<- time.Duration) error {
+// OnSeeked listens for "Seeked" signal and sends the new position as
+// time.Duration to position until ctx is canceled.
+func (i *Player) OnSeeked(
+	ctx context.Context,
+	position chan<- time.Duration,
+) error {
 	sigChan := make(chan *dbus.Signal, 10) // buffered to avoid blocking
 	defer close(sigChan)
 
@@ -114,8 +125,11 @@ func (i *Player) OnSeeked(ctx context.Context, position chan<- time.Duration) er
 
 // Properties
 
-// PlaybackStatus represents the playback status. It can be "Playing", "Paused" or "Stopped".
+// PlaybackStatus represents the playback status. It can be "Playing", "Paused"
+// or "Stopped".
 type PlaybackStatus string
+
+//revive:disable:exported
 
 const (
 	PlaybackPlaying PlaybackStatus = "Playing"
@@ -123,20 +137,26 @@ const (
 	PlaybackStopped PlaybackStatus = "Stopped"
 )
 
+//revive:enable:exported
+
 // GetPlaybackStatus returns the current playback status.
 func (i *Player) GetPlaybackStatus() (PlaybackStatus, error) {
 	str, err := getPlayerPropertyCast(i, "PlaybackStatus", cast.ToStringE)
 	return PlaybackStatus(str), err
 }
 
-// LoopStatus represents the loop status of the player. It can be "None", "Track" or "Playlist".
+// LoopStatus represents the loop status of the player. It can be "None",
+// "Track" or "Playlist".
 type LoopStatus string
 
+//revive:disable:exported
 const (
 	LoopNone     LoopStatus = "None"
 	LoopTrack    LoopStatus = "Track"
 	LoopPlaylist LoopStatus = "Playlist"
 )
+
+//revive:enable:exported
 
 // GetLoopStatus returns the current loop status.
 func (i *Player) GetLoopStatus() (LoopStatus, error) {
@@ -159,7 +179,8 @@ func (i *Player) SetRate(rate float64) error {
 	return i.SetPlayerProperty("Rate", rate)
 }
 
-// GetShuffle returns true if shuffle mode is enabled, false if playing linearly through a playlist.
+// GetShuffle returns true if shuffle mode is enabled, false if playing linearly
+// through a playlist.
 func (i *Player) GetShuffle() (bool, error) {
 	return getPlayerPropertyCast(i, "Shuffle", cast.ToBoolE)
 }
@@ -176,7 +197,11 @@ type Metadata map[string]dbus.Variant
 func (m Metadata) Get(key string) (any, error) {
 	v, ok := m[key]
 	if !ok || v.Value() == nil {
-		return v, fmt.Errorf("%s.Metadata missing or nil for key %q", PlayerInterface, key)
+		return v, fmt.Errorf(
+			"%s.Metadata missing or nil for key %q",
+			PlayerInterface,
+			key,
+		)
 	}
 	return v.Value(), nil
 }
@@ -188,7 +213,9 @@ func (i *Player) GetMetadata() (Metadata, error) {
 		if !ok {
 			return Metadata{}, fmt.Errorf(
 				"failed to cast %s.Metadata value (%v) to map[string]dbus.Variant",
-				PlayerInterface, a)
+				PlayerInterface,
+				a,
+			)
 		}
 		return Metadata(v), nil
 	})

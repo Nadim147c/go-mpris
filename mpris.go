@@ -9,22 +9,40 @@ import (
 )
 
 const (
-	dbusObjectPath          = "/org/mpris/MediaPlayer2"
+	// DBusObjectPath is the root object path for MPRIS-compatible media
+	// players. All MPRIS interfaces are exposed under this path on the D-Bus.
+	DBusObjectPath = "/org/mpris/MediaPlayer2"
+	// PropertiesChangedSignal is the D-Bus signal name emitted when a property
+	// changes on an MPRIS interface.
 	PropertiesChangedSignal = "org.freedesktop.DBus.Properties.PropertiesChanged"
-
-	BaseInterface      = "org.mpris.MediaPlayer2"
-	PlayerInterface    = "org.mpris.MediaPlayer2.Player"
+	// BaseInterface is the main MPRIS interface that provides general
+	// information and capabilities about the media player instance.
+	BaseInterface = "org.mpris.MediaPlayer2"
+	// PlayerInterface defines methods and properties for controlling playback,
+	// such as play, pause, seek, and retrieving track metadata.
+	PlayerInterface = "org.mpris.MediaPlayer2.Player"
+	// TrackListInterface provides access to the list of tracks managed by the
+	// player, allowing navigation, retrieval, and management of track items.
 	TrackListInterface = "org.mpris.MediaPlayer2.TrackList"
+	// PlaylistsInterface defines the MPRIS interface for managing and
+	// activating playlists exposed by the player.
 	PlaylistsInterface = "org.mpris.MediaPlayer2.Playlists"
-
-	getPropertyMethod = "org.freedesktop.DBus.Properties.Get"
-	setPropertyMethod = "org.freedesktop.DBus.Properties.Set"
+	// GetPropertyMethod is the standard D-Bus method used to retrieve the value
+	// of a property from an interface that implements
+	// org.freedesktop.DBus.Properties.
+	GetPropertyMethod = "org.freedesktop.DBus.Properties.Get"
+	// SetPropertyMethod is the standard D-Bus method used to change the value
+	// of a writable property on an interface that implements
+	// org.freedesktop.DBus.Properties.
+	SetPropertyMethod = "org.freedesktop.DBus.Properties.Set"
 )
 
 // List lists the available players.
 func List(conn *dbus.Conn) ([]string, error) {
 	var names []string
-	err := conn.BusObject().Call("org.freedesktop.DBus.ListNames", 0).Store(&names)
+	err := conn.BusObject().
+		Call("org.freedesktop.DBus.ListNames", 0).
+		Store(&names)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +81,8 @@ func (i *Player) GetLength() (time.Duration, error) {
 
 // GetTrackID returns track id for player as dbus.ObjectPath
 func (i *Player) GetTrackID() (dbus.ObjectPath, error) {
-	trackIdStr, err := getMetadataCast(i, "mpris:trackid", cast.ToStringE)
-	return dbus.ObjectPath(trackIdStr), err
+	trackIDStr, err := getMetadataCast(i, "mpris:trackid", cast.ToStringE)
+	return dbus.ObjectPath(trackIDStr), err
 }
 
 // GetTitle returns the current track title.
@@ -94,17 +112,17 @@ func (i *Player) GetCoverURL() (string, error) {
 
 // New connects the the player with the name in the connection conn.
 func New(conn *dbus.Conn, name string) *Player {
-	obj := conn.Object(name, dbusObjectPath).(*dbus.Object)
+	obj := conn.Object(name, DBusObjectPath).(*dbus.Object)
 	return &Player{conn, obj, name}
 }
 
 // OnSignal adds a handler to the player's properties change signal.
 //
 // Deprecated: Use OnSeeked
-func (i *Player) OnSignal(ch chan<- *dbus.Signal) (err error) {
-	err = i.conn.AddMatchSignal()
+func (i *Player) OnSignal(ch chan<- *dbus.Signal) error {
+	err := i.conn.AddMatchSignal()
 	if err == nil {
 		i.conn.Signal(ch)
 	}
-	return
+	return err
 }

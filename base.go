@@ -17,7 +17,9 @@ func (i *Player) Quit() error {
 // Properties
 
 // CanQuit returns whether the player can be quit.
-func (i *Player) CanQuit() (bool, error) { return getBasePropertyCast(i, "CanQuit", cast.ToBoolE) }
+func (i *Player) CanQuit() (bool, error) {
+	return getBasePropertyCast(i, "CanQuit", cast.ToBoolE)
+}
 
 // GetFullscreen returns whether the player is in fullscreen mode.
 func (i *Player) GetFullscreen() (bool, error) {
@@ -54,10 +56,14 @@ func (i *Player) GetDesktopEntry() (string, error) {
 	return getBasePropertyCast(i, "DesktopEntry", cast.ToStringE)
 }
 
+//revive:disable:var-naming
+
 // GetSupportedUriSchemes returns the supported URI schemes of the player.
 func (i *Player) GetSupportedUriSchemes() ([]string, error) {
 	return getBasePropertyCast(i, "SupportedUriSchemes", cast.ToStringSliceE)
 }
+
+//revive:enable:var-naming
 
 // SupportedMimeTypes returns the supported MIME types of the player.
 func (i *Player) SupportedMimeTypes() ([]string, error) {

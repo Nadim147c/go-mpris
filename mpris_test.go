@@ -109,7 +109,11 @@ func TestPlayerGetMethods(t *testing.T) {
 			t.Errorf("GetPlaybackStatus returned error: %v", err)
 		}
 
-		validStatuses := []PlaybackStatus{PlaybackPlaying, PlaybackPaused, PlaybackStopped}
+		validStatuses := []PlaybackStatus{
+			PlaybackPlaying,
+			PlaybackPaused,
+			PlaybackStopped,
+		}
 		valid := slices.Contains(validStatuses, status)
 
 		if !valid {
@@ -124,7 +128,10 @@ func TestPlayerGetMethods(t *testing.T) {
 		loopStatus, err := player.GetLoopStatus()
 		// Some players might not support loop status
 		if err != nil {
-			t.Logf("GetLoopStatus returned error (might be unsupported): %v", err)
+			t.Logf(
+				"GetLoopStatus returned error (might be unsupported): %v",
+				err,
+			)
 			return
 		}
 
@@ -171,7 +178,10 @@ func TestPlayerGetMethods(t *testing.T) {
 		metadata, err := player.GetMetadata()
 		// Some players might not have metadata if nothing is playing
 		if err != nil {
-			t.Logf("GetMetadata returned error (might be no active track): %v", err)
+			t.Logf(
+				"GetMetadata returned error (might be no active track): %v",
+				err,
+			)
 			return
 		}
 
@@ -196,7 +206,8 @@ func TestPlayerGetMethods(t *testing.T) {
 			t.Errorf("GetVolume returned error: %v", err)
 		}
 
-		// Volume should be between 0.0 and 1.0, or slightly higher for amplification
+		// Volume should be between 0.0 and 1.0, or slightly higher for
+		// amplification
 		if volume < 0.0 || volume > 2.0 {
 			t.Errorf("Expected volume between 0.0 and 2.0, got %f", volume)
 		}
@@ -209,13 +220,19 @@ func TestPlayerGetMethods(t *testing.T) {
 		length, err := player.GetLength()
 		// Length might return an error if no track is playing
 		if err != nil {
-			t.Logf("GetLength returned error (might be no active track): %v", err)
+			t.Logf(
+				"GetLength returned error (might be no active track): %v",
+				err,
+			)
 			return
 		}
 
 		// Length should be positive
 		if length < 0 {
-			t.Errorf("Expected positive length, got %s seconds", length.String())
+			t.Errorf(
+				"Expected positive length, got %s seconds",
+				length.String(),
+			)
 		}
 
 		t.Logf("Track length: %sf ", length.String())
@@ -226,20 +243,30 @@ func TestPlayerGetMethods(t *testing.T) {
 		position, err := player.GetPosition()
 		// Position might return an error if no track is playing
 		if err != nil {
-			t.Logf("GetPosition returned error (might be no active track): %v", err)
+			t.Logf(
+				"GetPosition returned error (might be no active track): %v",
+				err,
+			)
 			return
 		}
 
 		// Check that position is non-negative
 		if position < 0 {
-			t.Errorf("Expected non-negative position, got %s", position.String())
+			t.Errorf(
+				"Expected non-negative position, got %s",
+				position.String(),
+			)
 		}
 
 		// Get the track length and check that position is not beyond it
 		length, lengthErr := player.GetLength()
 		if lengthErr == nil && length > 0 && position > length+5 {
 			// Adding some tolerance (5 seconds) for timing issues
-			t.Errorf("Position (%s) exceeds track length (%s)", position.String(), length.String())
+			t.Errorf(
+				"Position (%s) exceeds track length (%s)",
+				position.String(),
+				length.String(),
+			)
 		}
 
 		t.Logf("Track position: %s", position.String())

@@ -14,7 +14,6 @@ func main() {
 	}
 
 	names, err := mpris.List(conn)
-
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +28,6 @@ func main() {
 	player := mpris.New(conn, name)
 
 	identity, err := player.GetIdentity()
-
 	if err != nil {
 		panic(err)
 	}
