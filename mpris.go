@@ -118,11 +118,17 @@ func New(conn *dbus.Conn, name string) *Player {
 
 // OnSignal adds a handler to the player's properties change signal.
 //
-// Deprecated: Use OnSeeked
+// Deprecated: Use mpris.OnSignal
 func (i *Player) OnSignal(ch chan<- *dbus.Signal) error {
-	err := i.conn.AddMatchSignal()
+	return OnSignal(i.conn, ch)
+}
+
+// OnSignal adds a handler to the player's properties change signal.
+func OnSignal(conn *dbus.Conn, ch chan<- *dbus.Signal) error {
+	// receive all MPRIS signal
+	err := conn.AddMatchSignal(dbus.WithMatchObjectPath(DBusObjectPath))
 	if err == nil {
-		i.conn.Signal(ch)
+		conn.Signal(ch)
 	}
 	return err
 }
