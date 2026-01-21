@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
@@ -27,12 +29,17 @@ func main() {
 
 	player := mpris.New(conn, name)
 
-	ch := make(chan *dbus.Signal)
-	err = player.OnSignal(ch)
-	if err != nil {
-		panic(err)
-	}
+	ch := make(chan time.Duration)
 
-	sig := <-ch
-	fmt.Println(sig.Body)
+	go func() {
+		err = player.OnSeeked(context.Background(), ch)
+		if err != nil {
+			panic(err)
+		}
+		close(ch)
+	}()
+
+	for dur := range ch {
+		fmt.Println(dur)
+	}
 }

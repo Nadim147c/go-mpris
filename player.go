@@ -87,16 +87,22 @@ func (i *Player) OpenURI(uri string) error {
 
 // OnSeeked listens for "Seeked" signal and sends the new position as
 // time.Duration to position until ctx is canceled.
-func (i *Player) OnSeeked(
-	ctx context.Context,
-	position chan<- time.Duration,
-) error {
+func (i *Player) OnSeeked(ctx context.Context, position chan<- time.Duration) error {
 	sigChan := make(chan *dbus.Signal, 10) // buffered to avoid blocking
 	defer close(sigChan)
 
-	err := i.conn.AddMatchSignal(
+	var sender string
+	err := i.conn.BusObject().
+		Call("org.freedesktop.DBus.GetNameOwner", 0, i.name).
+		Store(&sender)
+	if err != nil {
+		return err
+	}
+
+	err = i.conn.AddMatchSignal(
 		dbus.WithMatchInterface(PlayerInterface),
 		dbus.WithMatchMember("Seeked"),
+		dbus.WithMatchSender(sender),
 	)
 	if err != nil {
 		return err
@@ -112,13 +118,14 @@ func (i *Player) OnSeeked(
 			if !ok {
 				return nil
 			}
-			if len(signal.Body) != 1 {
+
+			var dur time.Duration
+			err := dbus.Store(signal.Body, &dur)
+			if err != nil {
 				continue
 			}
 
-			if val, err := cast.ToInt64E(signal.Body[0]); err == nil {
-				position <- time.Duration(val) * time.Microsecond
-			}
+			position <- dur * time.Microsecond
 		}
 	}
 }
