@@ -1,15 +1,23 @@
-# GO-MPRIS
+<h1 align="center"><pre>Go MPRIS</pre></h1>
+<h3 align="center">Go library for DBus-MPRIS.</h3>
 
-[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/go-mpris?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA)](https://pkg.go.dev/github.com/Nadim147c/go-mpris)
-[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris)
-[![GitHub License](https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge&labelColor=11140F&color=BBE9AA)](./LICENSE)
-[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/go-mpris?include_prereleases&sort=semver&style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris/tags)
-[![Git Commit](https://img.shields.io/github/last-commit/Nadim147c/go-mpris?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/go-mpris/tags)
+<h1 align="center">
+<a href="https://pkg.go.dev/github.com/Nadim147c/go-mpris">
+<img src="https://img.shields.io/github/go-mod/go-version/Nadim147c/go-mpris?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/go-mpris">
+<img src="https://img.shields.io/github/stars/Nadim147c/go-mpris?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/go-mpris/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/Nadim147c/go-mpris?style=for-the-badge&logo=gplv3&labelColor=11140F&color=BBE9AA">
+</a>
+<a href="https://github.com/Nadim147c/go-mpris/commits">
+<img src="https://img.shields.io/github/last-commit/Nadim147c/go-mpris?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA">
+</a>
+</h1>
 
 > [!IMPORTANT]
 > 🔥 Found this useful? A quick star goes a long way.
-
-A Go library for DBus-MPRIS.
 
 ## Features
 
