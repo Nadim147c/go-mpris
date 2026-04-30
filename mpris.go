@@ -37,6 +37,55 @@ const (
 	SetPropertyMethod = "org.freedesktop.DBus.Properties.Set"
 )
 
+const (
+	// KeyAlbum is the album name.
+	KeyAlbum = "xesam:album"
+	// KeyAlbumArtist is the album artist(s).
+	KeyAlbumArtist = "xesam:albumArtist"
+	// KeyArtist is the track artist(s).
+	KeyArtist = "xesam:artist"
+	// KeyAsText is the text/lyrics of the track.
+	KeyAsText = "xesam:asText"
+	// KeyAudioBPM is the speed of the music in beats per minute.
+	KeyAudioBPM = "xesam:audioBPM"
+	// KeyAutoRating is an automatically generated rating (0.0 to 1.0).
+	KeyAutoRating = "xesam:autoRating"
+	// KeyComment is a social comment about the track.
+	KeyComment = "xesam:comment"
+	// KeyComposer is the track composer(s).
+	KeyComposer = "xesam:composer"
+	// KeyContentCreated is the date/time the content was created.
+	KeyContentCreated = "xesam:contentCreated"
+	// KeyDiscNumber is the disc number on the album.
+	KeyDiscNumber = "xesam:discNumber"
+	// KeyFirstUsed is the date/time the track was first played.
+	KeyFirstUsed = "xesam:firstUsed"
+	// KeyGenre is the genre(s) of the track.
+	KeyGenre = "xesam:genre"
+	// KeyLastUsed is the date/time the track was last played by any user.
+	KeyLastUsed = "xesam:lastUsed"
+	// KeyLastUsedByMe is the date/time the track was last played by the current user.
+	KeyLastUsedByMe = "xesam:lastUsedByMe"
+	// KeyLyricist is the person who wrote the lyrics for the track.
+	KeyLyricist = "xesam:lyricist"
+	// KeyTitle is the item title.
+	KeyTitle = "xesam:title"
+	// KeyTrackNumber is the track number on the album.
+	KeyTrackNumber = "xesam:trackNumber"
+	// KeyURL is the location of the media file.
+	KeyURL = "xesam:url"
+	// KeyUseCount is the number of times the track has been played.
+	KeyUseCount = "xesam:useCount"
+	// KeyUserRating is the user's rating of the track (0.0 to 1.0).
+	KeyUserRating = "xesam:userRating"
+	// KeyTrackID is a unique identity for the track within the context of the playlist.
+	KeyTrackID = "mpris:trackid"
+	// KeyLength is the duration of the track in microseconds.
+	KeyLength = "mpris:length"
+	// KeyArtURL is a URI of some album art designed to represent the track/album.
+	KeyArtURL = "mpris:artUrl"
+)
+
 // List lists the available players.
 func List(conn *dbus.Conn) ([]string, error) {
 	var names []string
@@ -75,39 +124,48 @@ func (i *Player) CanEditTracks() (bool, error) {
 
 // GetLength returns the current track length.
 func (i *Player) GetLength() (time.Duration, error) {
-	micro, err := getMetadataCast(i, "mpris:length", cast.ToInt64E)
+	micro, err := getMetadataCast(i, KeyLength, cast.ToInt64E)
 	return time.Duration(micro) * time.Microsecond, err
 }
 
 // GetTrackID returns track id for player as dbus.ObjectPath
 func (i *Player) GetTrackID() (dbus.ObjectPath, error) {
-	trackIDStr, err := getMetadataCast(i, "mpris:trackid", cast.ToStringE)
+	trackIDStr, err := getMetadataCast(i, KeyTrackID, cast.ToStringE)
 	return dbus.ObjectPath(trackIDStr), err
 }
 
 // GetTitle returns the current track title.
 func (i *Player) GetTitle() (string, error) {
-	return getMetadataCast(i, "xesam:title", cast.ToStringE)
+	return getMetadataCast(i, KeyTitle, cast.ToStringE)
 }
 
 // GetArtist returns the current track artist(s).
 func (i *Player) GetArtist() ([]string, error) {
-	return getMetadataCast(i, "xesam:artist", cast.ToStringSliceE)
+	return getMetadataCast(i, KeyArtist, cast.ToStringSliceE)
 }
 
 // GetAlbum returns the current track album.
 func (i *Player) GetAlbum() (string, error) {
-	return getMetadataCast(i, "xesam:album", cast.ToStringE)
+	return getMetadataCast(i, KeyAlbum, cast.ToStringE)
 }
 
 // GetURL returns the URL of the current track.
 func (i *Player) GetURL() (string, error) {
-	return getMetadataCast(i, "xesam:url", cast.ToStringE)
+	return getMetadataCast(i, KeyURL, cast.ToStringE)
 }
 
 // GetCoverURL returns the cover art URL of the current track.
+//
+// Deprecated: Use mpris.OnSignal
+//
+//go:fix inline
 func (i *Player) GetCoverURL() (string, error) {
-	return getMetadataCast(i, "mpris:artUrl", cast.ToStringE)
+	return i.GetArtURL()
+}
+
+// GetArtURL returns the cover art URL of the current track.
+func (i *Player) GetArtURL() (string, error) {
+	return getMetadataCast(i, KeyArtURL, cast.ToStringE)
 }
 
 // New connects the the player with the name in the connection conn.
