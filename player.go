@@ -200,6 +200,12 @@ func (i *Player) SetShuffle(value bool) error {
 // Metadata represents the metadata of the current track.
 type Metadata map[string]dbus.Variant
 
+// Has checks if the metadata key exists.
+func (m Metadata) Has(key string) bool {
+	v, ok := m[key]
+	return ok && v.Value() != nil
+}
+
 // Get returns the value for the given metadata key.
 func (m Metadata) Get(key string) (any, error) {
 	v, ok := m[key]
