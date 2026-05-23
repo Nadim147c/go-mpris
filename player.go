@@ -257,6 +257,11 @@ func (m Metadata) Has(key string) bool {
 	return ok && v.Value() != nil
 }
 
+// Set sets a value to metadata.
+func (m Metadata) Set(key string, v any) {
+	m[key] = dbus.MakeVariant(v)
+}
+
 // Get returns the value for the given metadata key.
 func (m Metadata) Get(key string) (any, error) {
 	v, ok := m[key]
