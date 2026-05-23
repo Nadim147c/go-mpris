@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/go-mpris/v2"
 	"github.com/godbus/dbus/v5"
 )
 
@@ -27,7 +27,7 @@ func main() {
 
 	name := names[0]
 
-	player := mpris.New(conn, name)
+	player := mpris.NewClient(conn, name)
 
 	ch := make(chan time.Duration)
 

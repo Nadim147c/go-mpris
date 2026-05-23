@@ -22,7 +22,7 @@ func TestPlayerGetMethods(t *testing.T) {
 	}
 
 	// Create a player instance to test
-	player := New(conn, players[0])
+	player := NewClient(conn, players[0])
 
 	// Test GetName
 	t.Run("GetName", func(t *testing.T) {
@@ -35,7 +35,7 @@ func TestPlayerGetMethods(t *testing.T) {
 		t.Logf("Player name: %s", name)
 	})
 	t.Run("GetSupportedUriSchemes", func(t *testing.T) {
-		b, err := player.GetSupportedUriSchemes()
+		b, err := player.GetSupportedURISchemes()
 		if err != nil {
 			t.Errorf("GetSupportedUriSchemes returned error: %v", err)
 		}

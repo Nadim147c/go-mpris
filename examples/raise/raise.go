@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/go-mpris/v2"
 	"github.com/godbus/dbus/v5"
 )
 
@@ -25,7 +25,7 @@ func main() {
 	name := names[0]
 	log.Println("Found media player:", name)
 
-	player := mpris.New(conn, name)
+	player := mpris.NewClient(conn, name)
 
 	identity, err := player.GetIdentity()
 	if err != nil {

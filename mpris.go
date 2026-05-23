@@ -64,7 +64,8 @@ const (
 	KeyGenre = "xesam:genre"
 	// KeyLastUsed is the date/time the track was last played by any user.
 	KeyLastUsed = "xesam:lastUsed"
-	// KeyLastUsedByMe is the date/time the track was last played by the current user.
+	// KeyLastUsedByMe is the date/time the track was last played by the current
+	// user.
 	KeyLastUsedByMe = "xesam:lastUsedByMe"
 	// KeyLyricist is the person who wrote the lyrics for the track.
 	KeyLyricist = "xesam:lyricist"
@@ -105,80 +106,87 @@ func List(conn *dbus.Conn) ([]string, error) {
 	return mprisNames, nil
 }
 
-// Player represents a mpris player.
-type Player struct {
+// toDBusError converts a Go error to a DBus error.
+func toDBusError(err error) *dbus.Error {
+	if err == nil {
+		return nil
+	}
+	return dbus.NewError("org.freedesktop.DBus.Error.Failed", []interface{}{err.Error()})
+}
+
+// SERVER
+
+// Server represents a mpris server.
+type Server struct {
+	conn *dbus.Conn
+	name string
+}
+
+// NewServer connects the the server with the name in the connection conn.
+func NewServer(conn *dbus.Conn, name string) *Server {
+	return &Server{conn: conn, name: name}
+}
+
+// CLIENT
+
+// Client represents a mpris player.
+type Client struct {
 	conn *dbus.Conn
 	obj  *dbus.Object
 	name string
 }
 
 // GetName gets the player full name.
-func (i *Player) GetName() string {
+func (i *Client) GetName() string {
 	return i.name
 }
 
 // CanEditTracks returns if player can edit track list
-func (i *Player) CanEditTracks() (bool, error) {
+func (i *Client) CanEditTracks() (bool, error) {
 	return getTrackListPropertyCast(i, "CanEditTracks", cast.ToBoolE)
 }
 
 // GetLength returns the current track length.
-func (i *Player) GetLength() (time.Duration, error) {
+func (i *Client) GetLength() (time.Duration, error) {
 	micro, err := getMetadataCast(i, KeyLength, cast.ToInt64E)
 	return time.Duration(micro) * time.Microsecond, err
 }
 
 // GetTrackID returns track id for player as dbus.ObjectPath
-func (i *Player) GetTrackID() (dbus.ObjectPath, error) {
+func (i *Client) GetTrackID() (dbus.ObjectPath, error) {
 	trackIDStr, err := getMetadataCast(i, KeyTrackID, cast.ToStringE)
 	return dbus.ObjectPath(trackIDStr), err
 }
 
 // GetTitle returns the current track title.
-func (i *Player) GetTitle() (string, error) {
+func (i *Client) GetTitle() (string, error) {
 	return getMetadataCast(i, KeyTitle, cast.ToStringE)
 }
 
 // GetArtist returns the current track artist(s).
-func (i *Player) GetArtist() ([]string, error) {
+func (i *Client) GetArtist() ([]string, error) {
 	return getMetadataCast(i, KeyArtist, cast.ToStringSliceE)
 }
 
 // GetAlbum returns the current track album.
-func (i *Player) GetAlbum() (string, error) {
+func (i *Client) GetAlbum() (string, error) {
 	return getMetadataCast(i, KeyAlbum, cast.ToStringE)
 }
 
 // GetURL returns the URL of the current track.
-func (i *Player) GetURL() (string, error) {
+func (i *Client) GetURL() (string, error) {
 	return getMetadataCast(i, KeyURL, cast.ToStringE)
 }
 
-// GetCoverURL returns the cover art URL of the current track.
-//
-// Deprecated: Use mpris.OnSignal
-//
-//go:fix inline
-func (i *Player) GetCoverURL() (string, error) {
-	return i.GetArtURL()
-}
-
 // GetArtURL returns the cover art URL of the current track.
-func (i *Player) GetArtURL() (string, error) {
+func (i *Client) GetArtURL() (string, error) {
 	return getMetadataCast(i, KeyArtURL, cast.ToStringE)
 }
 
-// New connects the the player with the name in the connection conn.
-func New(conn *dbus.Conn, name string) *Player {
+// NewClient connects the the player with the name in the connection conn.
+func NewClient(conn *dbus.Conn, name string) *Client {
 	obj := conn.Object(name, DBusObjectPath).(*dbus.Object)
-	return &Player{conn, obj, name}
-}
-
-// OnSignal adds a handler to the player's properties change signal.
-//
-// Deprecated: Use mpris.OnSignal
-func (i *Player) OnSignal(ch chan<- *dbus.Signal) error {
-	return OnSignal(i.conn, ch)
+	return &Client{conn, obj, name}
 }
 
 // OnSignal adds a handler to the player's properties change signal.

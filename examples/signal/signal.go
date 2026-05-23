@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/go-mpris/v2"
 	"github.com/godbus/dbus/v5"
 )
 
