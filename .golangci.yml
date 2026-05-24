@@ -1,0 +1,77 @@
+version: "2"
+run:
+  tests: false
+linters:
+  disable:
+    - wrapcheck
+  enable:
+    - bodyclose
+    - err113
+    - errname
+    - exhaustive
+    - fatcontext
+    - forbidigo
+    - goconst
+    - godot
+    - gomoddirectives
+    - goprintffuncname
+    - gosec
+    - iface
+    - importas
+    - intrange
+    - mirror
+    - misspell
+    - modernize
+    - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - perfsprint
+    - prealloc
+    - rowserrcheck
+    - sloglint
+    - sqlclosecheck
+    - tparallel
+    - unconvert
+    - unparam
+    - whitespace
+    # - wrapcheck
+  exclusions:
+    rules:
+      - path: 'examples/.*.go'
+        linters:
+          - forbidigo
+          - errcheck
+          - gosec
+
+      - text: '(slog|log)\.\w+'
+        linters:
+          - noctx
+      - source: "^\\s*defer\\s+.*"
+        linters:
+          - errcheck
+    generated: lax
+    presets:
+      - common-false-positives
+
+  settings:
+    forbidigo:
+      forbid:
+        - pattern: ^print(ln)?$
+        - pattern: ^fmt\.Print.*$
+          msg: Do not commit print statements.
+
+    sloglint:
+      kv-only: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - goimports
+    - gofumpt
+  exclusions:
+    generated: lax

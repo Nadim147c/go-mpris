@@ -24,6 +24,21 @@ type PlayerHandler interface {
 	OpenURI(uri string) error
 }
 
+// NoOpPlayerHandler implement All method of PlayerHandler.
+type NoOpPlayerHandler struct{}
+
+func (NoOpPlayerHandler) Next() error              { return nil }
+func (NoOpPlayerHandler) Previous() error          { return nil }
+func (NoOpPlayerHandler) Pause() error             { return nil }
+func (NoOpPlayerHandler) PlayPause() error         { return nil }
+func (NoOpPlayerHandler) Stop() error              { return nil }
+func (NoOpPlayerHandler) Play() error              { return nil }
+func (NoOpPlayerHandler) Seek(time.Duration) error { return nil }
+func (NoOpPlayerHandler) OpenURI(string) error     { return nil }
+func (NoOpPlayerHandler) SetPosition(dbus.ObjectPath, time.Duration) error {
+	return nil
+}
+
 type dbusPlayerHandler struct{ h PlayerHandler }
 
 func (d *dbusPlayerHandler) Next() *dbus.Error {
@@ -50,7 +65,9 @@ func (d *dbusPlayerHandler) Play() *dbus.Error {
 	return toDBusError(d.h.Play())
 }
 
-func (d *dbusPlayerHandler) Seek(offset int64) *dbus.Error { //nolint
+// NOTE: Seek is method for io.Seeker.
+
+func (d *dbusPlayerHandler) MprisSeek(offset int64) *dbus.Error {
 	return toDBusError(d.h.Seek(time.Duration(offset) * time.Microsecond))
 }
 
@@ -64,7 +81,19 @@ func (d *dbusPlayerHandler) OpenUri(uri string) *dbus.Error {
 
 // RegisterPlayerHandler registers the player handler on the server.
 func (s *Server) RegisterPlayerHandler(handler PlayerHandler) error {
-	return s.conn.Export(&dbusPlayerHandler{h: handler}, DBusObjectPath, PlayerInterface)
+	h := dbusPlayerHandler{handler}
+	methods := map[string]any{
+		"Next":        h.Next,
+		"Previous":    h.Previous,
+		"Pause":       h.Pause,
+		"PlayPause":   h.PlayPause,
+		"Stop":        h.Stop,
+		"Play":        h.Play,
+		"Seek":        h.MprisSeek,
+		"SetPosition": h.SetPosition,
+		"OpenUri":     h.OpenUri,
+	}
+	return s.conn.ExportSubtreeMethodTable(methods, DBusObjectPath, PlayerInterface)
 }
 
 //---------
@@ -267,9 +296,8 @@ func (m Metadata) Get(key string) (any, error) {
 	v, ok := m[key]
 	if !ok || v.Value() == nil {
 		return v, fmt.Errorf(
-			"%s.Metadata missing or nil for key %q",
-			PlayerInterface,
-			key,
+			"%s.Metadata missing or nil for key %q: %w",
+			PlayerInterface, key, ErrValueMissing,
 		)
 	}
 	return v.Value(), nil
@@ -281,9 +309,8 @@ func (i *Client) GetMetadata() (Metadata, error) {
 		v, ok := a.(map[string]dbus.Variant)
 		if !ok {
 			return Metadata{}, fmt.Errorf(
-				"failed to cast %s.Metadata value (%v) to map[string]dbus.Variant",
-				PlayerInterface,
-				a,
+				"failed to cast %s.Metadata value to map[string]dbus.Variant: %w",
+				PlayerInterface, ErrInvalidType,
 			)
 		}
 		return Metadata(v), nil

@@ -13,6 +13,12 @@ type BaseHandler interface {
 	Quit() error
 }
 
+// NoOpBaseHandler implement All method of BaseHandler.
+type NoOpBaseHandler struct{}
+
+func (NoOpBaseHandler) Raise() error { return nil }
+func (NoOpBaseHandler) Quit() error  { return nil }
+
 type dbusBaseHandler struct{ h BaseHandler }
 
 func (d *dbusBaseHandler) Raise() *dbus.Error {
@@ -25,7 +31,12 @@ func (d *dbusBaseHandler) Quit() *dbus.Error {
 
 // RegisterBaseHandler registers the base handler on the server.
 func (s *Server) RegisterBaseHandler(handler BaseHandler) error {
-	return s.conn.Export(&dbusBaseHandler{h: handler}, DBusObjectPath, BaseInterface)
+	h := dbusBaseHandler{handler}
+	methods := map[string]any{
+		"Raise": h.Raise,
+		"Quit":  h.Quit,
+	}
+	return s.conn.ExportSubtreeMethodTable(methods, DBusObjectPath, BaseInterface)
 }
 
 // CLIENT

@@ -1,6 +1,10 @@
 package mpris
 
 import (
+	"context"
+	_ "embed"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -27,6 +31,8 @@ const (
 	// PlaylistsInterface defines the MPRIS interface for managing and
 	// activating playlists exposed by the player.
 	PlaylistsInterface = "org.mpris.MediaPlayer2.Playlists"
+	// PlaylistsInterface defines the MPRIS properties.
+	DBusPropertyInterface = "org.freedesktop.DBus.Properties"
 	// GetPropertyMethod is the standard D-Bus method used to retrieve the value
 	// of a property from an interface that implements
 	// org.freedesktop.DBus.Properties.
@@ -87,6 +93,12 @@ const (
 	KeyArtURL = "mpris:artUrl"
 )
 
+var (
+	ErrInvalidType     = errors.New("invalid type")
+	ErrNotPrimaryOwner = errors.New("not primary owner")
+	ErrValueMissing    = errors.New("value missing or nil")
+)
+
 // List lists the available players.
 func List(conn *dbus.Conn) ([]string, error) {
 	var names []string
@@ -111,20 +123,48 @@ func toDBusError(err error) *dbus.Error {
 	if err == nil {
 		return nil
 	}
-	return dbus.NewError("org.freedesktop.DBus.Error.Failed", []interface{}{err.Error()})
+	return dbus.MakeFailedError(err)
 }
 
 // SERVER
 
 // Server represents a mpris server.
 type Server struct {
-	conn *dbus.Conn
-	name string
+	conn   *dbus.Conn
+	name   string
+	cancel func()
 }
 
 // NewServer connects the the server with the name in the connection conn.
 func NewServer(conn *dbus.Conn, name string) *Server {
 	return &Server{conn: conn, name: name}
+}
+
+func (s *Server) Listen(ctx context.Context) error {
+	ctx, s.cancel = context.WithCancel(ctx)
+	defer s.cancel()
+
+	reply, err := s.conn.RequestName(s.name, dbus.NameFlagReplaceExisting)
+	if err != nil || reply != dbus.RequestNameReplyPrimaryOwner {
+		return fmt.Errorf("unable to claim %s: %w", s.name, ErrNotPrimaryOwner)
+	}
+
+	<-ctx.Done()
+
+	if _, err := s.conn.ReleaseName(s.name); err != nil {
+		return err
+	}
+
+	return ctx.Err()
+}
+
+func (s *Server) Close() error {
+	_, err := s.conn.ReleaseName(s.name)
+	if err != nil {
+		return err
+	}
+	s.cancel()
+	return nil
 }
 
 // CLIENT
@@ -141,7 +181,7 @@ func (i *Client) GetName() string {
 	return i.name
 }
 
-// CanEditTracks returns if player can edit track list
+// CanEditTracks returns if player can edit track list.
 func (i *Client) CanEditTracks() (bool, error) {
 	return getTrackListPropertyCast(i, "CanEditTracks", cast.ToBoolE)
 }
@@ -152,7 +192,7 @@ func (i *Client) GetLength() (time.Duration, error) {
 	return time.Duration(micro) * time.Microsecond, err
 }
 
-// GetTrackID returns track id for player as dbus.ObjectPath
+// GetTrackID returns track id for player as dbus.ObjectPath.
 func (i *Client) GetTrackID() (dbus.ObjectPath, error) {
 	trackIDStr, err := getMetadataCast(i, KeyTrackID, cast.ToStringE)
 	return dbus.ObjectPath(trackIDStr), err

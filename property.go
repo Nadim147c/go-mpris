@@ -72,6 +72,15 @@ type PropertySetter interface {
 	SetVolume(volume float64) error
 }
 
+// NoOpPropertySetter implement All method of PropertySetter.
+type NoOpPropertySetter struct{}
+
+func (NoOpPropertySetter) SetFullscreen(fullscreen bool) error   { return nil }
+func (NoOpPropertySetter) SetLoopStatus(status LoopStatus) error { return nil }
+func (NoOpPropertySetter) SetRate(rate float64) error            { return nil }
+func (NoOpPropertySetter) SetShuffle(shuffle bool) error         { return nil }
+func (NoOpPropertySetter) SetVolume(volume float64) error        { return nil }
+
 // dbusPropertyHandler handles org.freedesktop.DBus.Properties interface.
 type dbusPropertyHandler struct {
 	pm     *PropertiesManager
@@ -239,7 +248,13 @@ func (d *dbusPropertyHandler) GetAll(iface string) (map[string]dbus.Variant, *db
 
 // RegisterPropertiesManager registers the property manager on the server.
 func (s *Server) RegisterPropertiesManager(pm *PropertiesManager, setter PropertySetter) error {
-	return s.conn.Export(&dbusPropertyHandler{pm: pm, setter: setter}, DBusObjectPath, "org.freedesktop.DBus.Properties")
+	p := &dbusPropertyHandler{pm, setter}
+	methods := map[string]any{
+		"Get":    p.Get,
+		"GetAll": p.GetAll,
+		"Set":    p.Set,
+	}
+	return s.conn.ExportSubtreeMethodTable(methods, DBusObjectPath, DBusPropertyInterface)
 }
 
 // CLIENT
@@ -342,19 +357,15 @@ func getPropertyCast[T any](
 	}
 	if variant.Value() == nil {
 		return v, fmt.Errorf(
-			"property %s.%s returned nil value",
-			iface,
-			property,
+			"failed get %s.%s: %w",
+			iface, property, ErrValueMissing,
 		)
 	}
 	result, err := caster(variant.Value())
 	if err != nil {
 		return v, fmt.Errorf(
 			"failed to cast %s.%s value (%v): %w",
-			iface,
-			property,
-			variant.Value(),
-			err,
+			iface, property, variant.Value(), err,
 		)
 	}
 	return result, nil
@@ -392,13 +403,13 @@ func getTrackListPropertyCast[T any](
 
 // getPlaylistPropertyCast returns playlists interface property and casts value
 // using the provided caster function.
-func getPlaylistPropertyCast[T any](
-	i *Client,
-	property string,
-	caster func(any) (T, error),
-) (T, error) {
-	return getPropertyCast(i, PlaylistsInterface, property, caster)
-}
+// func getPlaylistPropertyCast[T any](
+// 	i *Client,
+// 	property string,
+// 	caster func(any) (T, error),
+// ) (T, error) {
+// 	return getPropertyCast(i, PlaylistsInterface, property, caster)
+// }
 
 // getMetadataCast returns metadata value for the given key and casts it using
 // the provided caster function.
@@ -420,10 +431,7 @@ func getMetadataCast[T any](
 	if err != nil {
 		return v, fmt.Errorf(
 			"%s.Metadata: failed to cast value (%v) of %q: %w",
-			PlayerInterface,
-			val,
-			key,
-			err,
+			PlayerInterface, val, key, err,
 		)
 	}
 	return v, nil
